@@ -1,7 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kaylatask/home_page.dart';
+import 'package:kaylatask/otp_verify.dart';
 
 class OtpPage extends StatefulWidget {
-  const OtpPage({super.key});
+  static String verify="";
+  bool isVerified = false; // Keep track of OTP verification
+   OtpPage({super.key});
 
   @override
   State<OtpPage> createState() => _OtpPageState();
@@ -9,6 +14,10 @@ class OtpPage extends StatefulWidget {
 
 class _OtpPageState extends State<OtpPage> {
   TextEditingController phonecontrollers=TextEditingController();
+  TextEditingController countryController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  var phone = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +52,7 @@ class _OtpPageState extends State<OtpPage> {
                     return null;
                 },
                 controller: phonecontrollers,
-                keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   hintText: 'Enter your phone number',
                   border: InputBorder.none, // Remove the default underline
@@ -54,8 +63,44 @@ class _OtpPageState extends State<OtpPage> {
           ),
           SizedBox(height: 20,),
           InkWell(
-              onTap: () {
-                _showRequestDialog();
+              onTap: () async{
+
+                String phoneNumber = '+91${phonecontrollers.text}.}';
+
+                // Check if OTP verification is already done
+                if (!widget.isVerified) {
+                  // Perform OTP verification
+                  await FirebaseAuth.instance.verifyPhoneNumber(
+                    phoneNumber: phoneNumber,
+                    verificationCompleted: (PhoneAuthCredential credential) {
+                      // OTP verification is completed
+                      widget.isVerified = true;
+                      // Automatically sign in after OTP verification
+                      signInWithPhoneNumber(credential);
+                    },
+                    verificationFailed: (FirebaseAuthException e) {
+                      // Handle verification failure
+                      print("Verification Failed: ${e.message}");
+                    },
+                    codeSent: (String verificationId, int? resendToken) {
+                      // Set verificationId for later use
+                      OtpPage.verify = verificationId;
+                      // Navigate to OTP verification screen
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => MyVerify()),
+                      );
+                    },
+                    codeAutoRetrievalTimeout: (String verificationId) {
+                      // Handle timeout
+                      print("Verification Timed Out: $verificationId");
+                    },
+                  );
+                } else {
+                  // OTP is already verified, directly sign in
+                  signInWithPhoneNumber(null); // Pass null as credential
+                }
+                // _showRequestDialog();
               },
               child: Container(
                   decoration: BoxDecoration(
@@ -84,7 +129,7 @@ class _OtpPageState extends State<OtpPage> {
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
-             "Diet Plan Request",
+             "Get OTP",
             style: TextStyle(
               fontSize: 20
             ),
@@ -116,5 +161,31 @@ class _OtpPageState extends State<OtpPage> {
         );
       },
     );
+  }
+
+  Future<void> signInWithPhoneNumber(PhoneAuthCredential? credential) async {
+    try {
+      UserCredential? userCredential; // Initialize as nullable
+
+      // Check if credential is provided and perform sign-in accordingly
+      if (credential != null) {
+        userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      } else {
+        // If no credential provided, handle your specific sign-in logic here
+        // For example, using cached credentials or stored information
+      }
+
+      // Check if user is successfully logged in
+      if (userCredential?.user != null) {
+        // User is logged in, navigate to the appropriate screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      }
+    } catch (e) {
+      print("Sign In Failed: $e");
+      // Handle sign-in failure
+    }
   }
 }

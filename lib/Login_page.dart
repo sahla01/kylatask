@@ -132,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                     child: TextFormField(
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.black),
                       validator: (value) {
                         if (value != passwordcontroller.text) {
                           return "Enter  password does not match";
@@ -182,7 +182,16 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(height: 50,),
                 InkWell(
                     onTap: () {
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+
+                      FirebaseAuth.instance.signInWithEmailAndPassword(email: emailcontroller.text, password: passwordcontroller.text).then((value) {
+
+
+
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+
+
+                      });
+
                     },
                     child: Container(
                         decoration: BoxDecoration(

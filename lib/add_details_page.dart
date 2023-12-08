@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'home_page.dart';
 
@@ -12,6 +17,9 @@ class AddDetailsPage extends StatefulWidget {
 class _AddDetailsPageState extends State<AddDetailsPage> {
   TextEditingController namecontroller =TextEditingController();
   TextEditingController agecontroller =TextEditingController();
+  XFile? _image;
+  final ImagePicker _picker = ImagePicker();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,15 +46,11 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
                  color: Colors.black
                )
              ),
-             child: Stack(
-               children: [
-                 Center(child: Icon(Icons.image,color: Colors.white,size: 35,)),
-                 Positioned(
-                   right: 33,
-                     top: 33,
-                     child: Icon(Icons.add,color: Colors.white,))
-               ],
-            ),
+             child: Center(child: InkWell(
+                 onTap: (){
+                   showimage();
+                 },
+                 child: Icon(Icons.image,color: Colors.white,size: 35,))),
               ),
             SizedBox(height: 50,),
             Padding(
@@ -100,7 +104,7 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
                   },
                   cursorColor: const Color(0xff565353),
                   controller: agecontroller,
-                  keyboardType: TextInputType.phone,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 13, horizontal: 13),
@@ -129,8 +133,9 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
             SizedBox(height: 70,),
             InkWell(
                 onTap: () {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
-                },
+
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                  },
                 child: Container(
                     decoration: BoxDecoration(
                         color: Colors.teal,
@@ -163,5 +168,94 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
             );
           }),
     );
+  }
+  _imageFromGallery() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxHeight: 480,
+      maxWidth: 640,
+      imageQuality: 50,
+    );
+    if (image != null) {
+      Uint8List imageBytes = await image.readAsBytes();
+      String base64String = base64.encode(imageBytes);
+      setState(() {
+        isImageSelected = true;
+        imageFile = image;
+        imgB64 = base64String;
+      });
+    }
+  }
+
+  _imagefromcamera() async {
+    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    setState(() {
+      _image = photo;
+    });
+  }
+
+  showimage() {
+    showModalBottomSheet(
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        backgroundColor: Colors.white,
+        context: context,
+        builder: (context) {
+          return Container(
+            height: 100,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Ink(
+                        decoration: ShapeDecoration(
+                          color: Colors.pink,
+                          shape: CircleBorder(),
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            _imagefromcamera();
+                          },
+                          icon: Icon(Icons.camera_alt_rounded,
+                              color: Colors.white),
+                          iconSize: 20,
+                          splashRadius: 40,
+                        ),
+                      ),
+                      Text("Camera"),
+                    ],
+                  ),
+                  SizedBox(
+                    width: 30,
+                  ),
+                  Column(
+                    children: [
+                      Ink(
+                        decoration: ShapeDecoration(
+                          color: Colors.purple,
+                          shape: CircleBorder(),
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            _imagefromgallery();
+                          },
+                          icon: Icon(Icons.photo),
+                          color: Colors.white,
+                          iconSize: 20,
+                          splashRadius: 40,
+                        ),
+                      ),
+                      Text("Gallery"),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }
