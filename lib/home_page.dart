@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kaylatask/Login_page.dart';
 import 'package:kaylatask/add_details_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -50,7 +51,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
               onPressed: ()
               {
-                // Navigator.push(context, MaterialPageRoute(builder: (context)=>ViewNotification()));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginPage()));
               },
               icon: Icon(
                 Icons.logout,

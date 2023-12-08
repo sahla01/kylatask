@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kaylatask/home_page.dart';
 import 'package:kaylatask/otp_page.dart';
 import 'package:kaylatask/sign_up_page.dart';
@@ -11,12 +13,55 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  Future<void> signInWithGoogle(BuildContext context) async {
+    GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+    AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+    UserCredential userCredential =
+    await FirebaseAuth.instance.signInWithCredential(credential);
+
+    if (userCredential.user != null) {
+      String displayName = userCredential.user!.displayName ?? 'Unknown User';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Logged in as $displayName'),
+        ),
+      );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(),
+        ),
+      );
+    } else {
+      print('Sign-in failed');
+    }
+  }
   TextEditingController emailcontroller =TextEditingController();
   TextEditingController passwordcontroller =TextEditingController();
   var visibility = true;
 
   @override
   Widget build(BuildContext context) {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       body: SafeArea(
           child: SingleChildScrollView(
@@ -115,9 +160,9 @@ class _LoginPageState extends State<LoginPage> {
                             child: visibility == true
                                 ? const Icon(
                                 Icons.visibility_off_outlined,
-                                color: Color(0xff351070))
+                                color: Colors.black)
                                 : const Icon(Icons.visibility,
-                                color: Color(0xff351070)
+                                color: Colors.black
                             )
                         ),
                     ),
@@ -187,8 +232,13 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.only(left: 130),
                   child: Row(
                     children: [
-                      Image.asset('assets/images/googleimg.png',
-                      height: 25,),
+                      InkWell(
+                        onTap:(){
+                          signInWithGoogle(context);
+                        },
+                        child: Image.asset('assets/images/googleimg.png',
+                        height: 25,),
+                      ),
                       SizedBox(width: 50,),
                       InkWell(
                         onTap: (){
