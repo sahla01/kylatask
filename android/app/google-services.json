@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "258604075919",
+    "project_id": "kaylatask-487c9",
+    "storage_bucket": "kaylatask-487c9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258604075919:android:01f0d3b29c066659add9fa",
+        "android_client_info": {
+          "package_name": "com.example.kaylatask"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAM_LgNQuM4f5RQHBu4Ct3KKg2XG7hPBPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258604075919:android:55440449213f47c6add9fa",
+        "android_client_info": {
+          "package_name": "com.kyla.kaylatask"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAM_LgNQuM4f5RQHBu4Ct3KKg2XG7hPBPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
