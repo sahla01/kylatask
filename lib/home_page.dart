@@ -45,17 +45,48 @@ class _HomePageState extends State<HomePage> {
   //   });
   // }
 
-  void _searchFilter(String query) {
+  // void _searchFilter(String query) {
+  //   setState(() {
+  //     if (query.isNotEmpty) {
+  //       _filteredUserList = userList
+  //           .where((user) =>
+  //       user['Name'].toLowerCase().contains(query.toLowerCase()) &&
+  //           int.parse(user['Age']) >= _startValue.round() &&
+  //           int.parse(user['Age']) <= _endValue.round())
+  //           .toList();
+  //     } else {
+  //       _filteredUserList = userList
+  //           .where((user) =>
+  //       int.parse(user['Age']) >= _startValue.round() &&
+  //           int.parse(user['Age']) <= _endValue.round())
+  //           .toList();
+  //     }
+  //   });
+  // }
+
+  void _searchByName(String query) {
     setState(() {
       if (query.isNotEmpty) {
         _filteredUserList = userList
-            .where((user) => user['Name'].toLowerCase().contains(query.toLowerCase()))
+            .where((user) =>
+            user['Name'].toLowerCase().contains(query.toLowerCase()))
             .toList();
       } else {
         _filteredUserList = List.from(userList);
       }
     });
   }
+
+  void _filterByAgeRange() {
+    setState(() {
+      _filteredUserList = userList
+          .where((user) =>
+      int.parse(user['Age']) >= _startValue.round() &&
+          int.parse(user['Age']) <= _endValue.round())
+          .toList();
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +97,7 @@ class _HomePageState extends State<HomePage> {
         title: Container(
           width: MediaQuery.of(context).size.width * 0.9,
           child: TextFormField(
-            onChanged: (value) => _searchFilter(value),
+            onChanged: (value) => _searchByName(value),
                 // _searchFilter(value),
             controller: searchcontroller,
             decoration: InputDecoration(
@@ -133,6 +164,7 @@ class _HomePageState extends State<HomePage> {
                       _startValue = values.start.clamp(0.0, 50.0);
                       _endValue = values.end.clamp(0.0, 50.0);
                     });
+                    _filterByAgeRange();
                   },
                   activeColor: Colors.teal,
                   inactiveColor: Colors.grey, // Add this line to set
