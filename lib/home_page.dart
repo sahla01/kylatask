@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kaylatask/Login_page.dart';
@@ -15,15 +16,48 @@ class _HomePageState extends State<HomePage> {
   double _value = 0.0;
   double _startValue = 0.0; // Add this line
   double _endValue = 50.0;
+  CollectionReference _users = FirebaseFirestore.instance.collection('User');
+
+  List<Map<String, dynamic>> userList = [];
+  List<Map<String, dynamic>> _filteredUserList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsers();
+  }
+
+  void _loadUsers() async {
+    QuerySnapshot querySnapshot = await _users.get();
+    setState(() {
+      userList = querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      _filteredUserList = List.from(userList);
+    });
+  }
+
+  void _searchFilter(String query) {
+    setState(() {
+      if (query.isNotEmpty) {
+        _filteredUserList = userList
+            .where((user) => user['Name'].toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      } else {
+        _filteredUserList = List.from(userList);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white.withOpacity(0.9),
       appBar: AppBar(
         backgroundColor: Colors.teal,
         title: Container(
           width: MediaQuery.of(context).size.width * 0.9,
           child: TextFormField(
+            onChanged: (value) => _searchFilter(value),
+                // _searchFilter(value),
             controller: searchcontroller,
             decoration: InputDecoration(
                 contentPadding: const EdgeInsets.symmetric(),
@@ -31,10 +65,10 @@ class _HomePageState extends State<HomePage> {
                 hintText: 'Search',
                 fillColor: const Color(0XFFD9D9D9),
                 focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
                     borderSide: BorderSide(width: 1, color: Colors.grey)),
                 enabledBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
                     borderSide: BorderSide(
                       color: Colors.grey,
                     )),
@@ -97,97 +131,102 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: ListView.builder(
-                  itemCount: 4,
-                  itemBuilder: (BuildContext context, int index) {
-                    return InkWell(
-                      onTap: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(9.0),
-                        child: Card(
-                          color: Color(0xffeae9e9),
-                          shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                            Radius.circular(10.0),
-                          )),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Image.asset(
-                                      'assets/images/fitnesimg1.png',
-                                      height: 25,
+            Container(
+              height: 200,
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _users.snapshots(),
+                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text('Something went wrong'),
+                    );
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  userList = snapshot.data!.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+                  return ListView(
+                    children: _filteredUserList.map((user) {
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5.0), color: Colors.white),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: CircleAvatar(
+                                    radius: 25,
+                                    child: ClipOval(
+                                      child: user['Image'] != null
+                                          ? Image.network(
+                                        user['Image'],
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                      )
+                                          : Image.asset('assets/images/user.png', width: 50, height: 50),
                                     ),
                                   ),
-                                  SizedBox(
-                                    width: 10,
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(user['Name']),
+                                      const SizedBox(
+                                        height: 3,
+                                      ),
+                                      Text(user['Age']),
+                                    ],
                                   ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "sahla",
-                                                  style: TextStyle(
-                                                      color: Colors.grey),
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Text(
-                                                  "26",
-                                                  style: TextStyle(
-                                                      color: Colors.grey),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(right: 90),
-        child: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => AddDetailsPage()));
-          },
-          label: Text(
-            "Add Student",
-            style: TextStyle(color: Colors.white),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 40,
+            width: 140,
+            child: FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => AddDetailsPage()));
+              },
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25)
+              ),
+              label: Text(
+                "Add Student",
+                style: TextStyle(color: Colors.white),
+              ),
+              icon: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              backgroundColor: Colors.teal,
+            ),
           ),
-          icon: Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
-          backgroundColor: Colors.teal,
-        ),
+        ],
       ),
     );
   }

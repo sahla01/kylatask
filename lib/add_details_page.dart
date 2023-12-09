@@ -1,11 +1,14 @@
+
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'home_page.dart';
+import 'modelclass.dart';
 
 class AddDetailsPage extends StatefulWidget {
   const AddDetailsPage({super.key});
@@ -17,7 +20,9 @@ class AddDetailsPage extends StatefulWidget {
 class _AddDetailsPageState extends State<AddDetailsPage> {
   TextEditingController namecontroller =TextEditingController();
   TextEditingController agecontroller =TextEditingController();
+  String? imgB64;
   XFile? _image;
+  UserManagement userManagement = UserManagement();
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -36,22 +41,26 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
               ),),
             ),
             SizedBox(height: 50,),
-            Container(
-             height: 120,
-             width: 120,
-             decoration: BoxDecoration(
-               color: Colors.teal,
-               borderRadius: BorderRadius.all(Radius.circular(70)),
-               border: Border.all(
-                 color: Colors.black
-               )
-             ),
-             child: Center(child: InkWell(
-                 onTap: (){
-                   showimage();
-                 },
-                 child: Icon(Icons.image,color: Colors.white,size: 35,))),
-              ),
+            InkWell(
+                onTap: (){
+                  showimage();
+                },
+                child:
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.teal,
+                  child: ClipOval(
+                    child: _image != null // Case 1: Editing with local image
+                        ? Image.file(
+                      File(_image!.path),
+                      fit: BoxFit.cover,
+                      height: 95,
+                      width: 95,
+
+                    ):
+                    Icon(Icons.image,color: Colors.white,size: 35,),
+                  ),
+                )),
             SizedBox(height: 50,),
             Padding(
               padding: const EdgeInsets.all(25.0),
@@ -133,9 +142,29 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
             SizedBox(height: 70,),
             InkWell(
                 onTap: () {
-
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
-                  },
+                  if (namecontroller.text.isNotEmpty &&
+                      agecontroller.text.isNotEmpty
+                      && _image.toString().isNotEmpty){
+                    if (_image!= null) {
+                      String imagePath = _image!.path;
+                      userManagement.uploadImageAndUserData(
+                        name: namecontroller.text,
+                        age: agecontroller.text,
+                        imagePath: imagePath, // Pass the extracted file path
+                      );
+                    }
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                  }else{
+                    Fluttertoast.showToast(
+                        msg: "All fields are mandatory!",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                  }
+                },
                 child: Container(
                     decoration: BoxDecoration(
                         color: Colors.teal,
@@ -169,28 +198,36 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
           }),
     );
   }
-  _imageFromGallery() async {
+
+  _imagefromgallery() async {
     final XFile? image = await _picker.pickImage(
-      source: ImageSource.gallery,
-      maxHeight: 480,
-      maxWidth: 640,
-      imageQuality: 50,
+        source: ImageSource.gallery,
+        maxHeight: 480,
+        maxWidth: 640,
+        imageQuality: 50
     );
-    if (image != null) {
-      Uint8List imageBytes = await image.readAsBytes();
-      String base64String = base64.encode(imageBytes);
-      setState(() {
-        isImageSelected = true;
-        imageFile = image;
-        imgB64 = base64String;
-      });
-    }
+    Uint8List imagebytes = await image!.readAsBytes();
+    String base64String = base64.encode(imagebytes);
+    setState(() {
+      _image = image;
+      imgB64 = base64String;
+      print(_image);
+      print('abfcvfdd');
+    });
   }
 
   _imagefromcamera() async {
-    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxHeight: 480,
+        maxWidth: 640,
+        imageQuality: 50
+    );
+    Uint8List imagebytes = await image!.readAsBytes();
+    String base64String = base64.encode(imagebytes);
     setState(() {
-      _image = photo;
+      _image = image;
+      imgB64 = base64String;
     });
   }
 
@@ -201,7 +238,7 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
         backgroundColor: Colors.white,
         context: context,
         builder: (context) {
-          return Container(
+          return SizedBox(
             height: 100,
             child: Padding(
               padding: const EdgeInsets.all(15.0),
@@ -212,44 +249,46 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
                   Column(
                     children: [
                       Ink(
-                        decoration: ShapeDecoration(
+                        decoration: const ShapeDecoration(
                           color: Colors.pink,
                           shape: CircleBorder(),
                         ),
                         child: IconButton(
                           onPressed: () {
                             _imagefromcamera();
+                            Navigator.pop(context);
                           },
-                          icon: Icon(Icons.camera_alt_rounded,
+                          icon: const Icon(Icons.camera_alt_rounded,
                               color: Colors.white),
                           iconSize: 20,
                           splashRadius: 40,
                         ),
                       ),
-                      Text("Camera"),
+                      Text("camera"),
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 30,
                   ),
                   Column(
                     children: [
                       Ink(
-                        decoration: ShapeDecoration(
+                        decoration: const ShapeDecoration(
                           color: Colors.purple,
                           shape: CircleBorder(),
                         ),
                         child: IconButton(
                           onPressed: () {
                             _imagefromgallery();
+                            Navigator.pop(context);
                           },
-                          icon: Icon(Icons.photo),
+                          icon: const Icon(Icons.photo),
                           color: Colors.white,
                           iconSize: 20,
                           splashRadius: 40,
                         ),
                       ),
-                      Text("Gallery"),
+                      Text("gallery"),
                     ],
                   ),
                 ],
@@ -258,4 +297,5 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
           );
         });
   }
+
 }
