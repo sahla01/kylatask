@@ -4,10 +4,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:uuid/uuid.dart';
 
 class UserManagement {
   final CollectionReference usersCollection =
   FirebaseFirestore.instance.collection('User');
+
+  var id=Uuid().v1();
 
   Future<void> uploadImageAndUserData({
     required String name,
@@ -25,7 +28,7 @@ class UserManagement {
 
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        String userId = user.uid;
+        String userId = id;
         await usersCollection.doc(userId).set({
           "Name": name,
           "Age": age,

@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 import 'home_page.dart';
 import 'modelclass.dart';
@@ -24,7 +25,13 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
   XFile? _image;
   UserManagement userManagement = UserManagement();
   final ImagePicker _picker = ImagePicker();
-
+  var uuid=Uuid();
+  var id;
+  @override
+  void initState() {
+    id=uuid.v1();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

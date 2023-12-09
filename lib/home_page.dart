@@ -27,13 +27,23 @@ class _HomePageState extends State<HomePage> {
     _loadUsers();
   }
 
-  void _loadUsers() async {
-    QuerySnapshot querySnapshot = await _users.get();
-    setState(() {
-      userList = querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-      _filteredUserList = List.from(userList);
+  void _loadUsers() {
+    _users.snapshots().listen((QuerySnapshot querySnapshot) {
+      setState(() {
+        userList = querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+        _filteredUserList = List.from(userList);
+      });
     });
   }
+
+
+  // void _loadUsers() async {
+  //   QuerySnapshot querySnapshot = await _users.get();
+  //   setState(() {
+  //     userList = querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+  //     _filteredUserList = List.from(userList);
+  //   });
+  // }
 
   void _searchFilter(String query) {
     setState(() {
@@ -92,47 +102,47 @@ class _HomePageState extends State<HomePage> {
               )),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 25),
-              child: Row(
-                children: [
-                  Text(
-                    "Age Range: 0-50",
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 25),
+            child: Row(
+              children: [
+                Text(
+                  "Age Range: 0-50",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  width: 30,
+                ),
+                RangeSlider(
+                  min: 0.0,
+                  max: 50.0,
+                  divisions: 10,
+                  labels: RangeLabels(
+                    _startValue.round().toString(),
+                    _endValue.round().toString(),
                   ),
-                  SizedBox(
-                    width: 30,
+                  values: RangeValues(
+                    _startValue.clamp(0.0, 50.0),
+                    _endValue.clamp(0.0, 50.0),
                   ),
-                  RangeSlider(
-                    min: 0.0,
-                    max: 50.0,
-                    divisions: 10,
-                    labels: RangeLabels(
-                      _startValue.round().toString(),
-                      _endValue.round().toString(),
-                    ),
-                    values: RangeValues(
-                      _startValue.clamp(0.0, 50.0),
-                      _endValue.clamp(0.0, 50.0),
-                    ),
-                    onChanged: (values) {
-                      setState(() {
-                        _startValue = values.start.clamp(0.0, 50.0);
-                        _endValue = values.end.clamp(0.0, 50.0);
-                      });
-                    },
-                    activeColor: Colors.teal,
-                    inactiveColor: Colors.grey, // Add this line to set
-                  )
-                ],
-              ),
+                  onChanged: (values) {
+                    setState(() {
+                      _startValue = values.start.clamp(0.0, 50.0);
+                      _endValue = values.end.clamp(0.0, 50.0);
+                    });
+                  },
+                  activeColor: Colors.teal,
+                  inactiveColor: Colors.grey, // Add this line to set
+                )
+              ],
             ),
-            Container(
-              height: 200,
+          ),
+          Expanded(
+            child: Container(
+
               child: StreamBuilder<QuerySnapshot>(
                 stream: _users.snapshots(),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -198,8 +208,8 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.center,
