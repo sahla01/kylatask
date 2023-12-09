@@ -143,28 +143,28 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
             InkWell(
                 onTap: () {
                   if (namecontroller.text.isNotEmpty &&
-                      agecontroller.text.isNotEmpty
-                      && _image.toString().isNotEmpty){
-                    if (_image!= null) {
-                      String imagePath = _image!.path;
-                      userManagement.uploadImageAndUserData(
-                        name: namecontroller.text,
-                        age: agecontroller.text,
-                        imagePath: imagePath, // Pass the extracted file path
-                      );
-                    }
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
-                  }else{
+                      agecontroller.text.isNotEmpty &&
+                      _image != null) {  // Check if _image is not null
+                    String imagePath = _image!.path;
+                    userManagement.uploadImageAndUserData(
+                      name: namecontroller.text,
+                      age: agecontroller.text,
+                      imagePath: imagePath,
+                    );
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+                  } else {
                     Fluttertoast.showToast(
-                        msg: "All fields are mandatory!",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.CENTER,
-                        timeInSecForIosWeb: 1,
-                        backgroundColor: Colors.red,
-                        textColor: Colors.white,
-                        fontSize: 16.0);
+                      msg: "All fields are mandatory!",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.CENTER,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.red,
+                      textColor: Colors.white,
+                      fontSize: 16.0,
+                    );
                   }
                 },
+
                 child: Container(
                     decoration: BoxDecoration(
                         color: Colors.teal,
