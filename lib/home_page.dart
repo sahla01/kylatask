@@ -36,34 +36,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-
-  // void _loadUsers() async {
-  //   QuerySnapshot querySnapshot = await _users.get();
-  //   setState(() {
-  //     userList = querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-  //     _filteredUserList = List.from(userList);
-  //   });
-  // }
-
-  // void _searchFilter(String query) {
-  //   setState(() {
-  //     if (query.isNotEmpty) {
-  //       _filteredUserList = userList
-  //           .where((user) =>
-  //       user['Name'].toLowerCase().contains(query.toLowerCase()) &&
-  //           int.parse(user['Age']) >= _startValue.round() &&
-  //           int.parse(user['Age']) <= _endValue.round())
-  //           .toList();
-  //     } else {
-  //       _filteredUserList = userList
-  //           .where((user) =>
-  //       int.parse(user['Age']) >= _startValue.round() &&
-  //           int.parse(user['Age']) <= _endValue.round())
-  //           .toList();
-  //     }
-  //   });
-  // }
-
   void _searchByName(String query) {
     setState(() {
       if (query.isNotEmpty) {
