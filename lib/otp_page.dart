@@ -22,6 +22,7 @@ class _OtpPageState extends State<OtpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Form(
         key: otpKey,
         child: Column(
@@ -31,9 +32,10 @@ class _OtpPageState extends State<OtpPage> {
               padding: const EdgeInsets.only(
                   left: 30, right: 30, top: 25),
               child: Container(
+                padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(30.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.3),
