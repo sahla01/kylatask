@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kaylatask/Login_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -12,6 +13,8 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,9 +97,13 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: TextFormField(
                   style: TextStyle(color: Colors.black),
                   validator: (value) {
-                    if (value != passwordcontroller.text) {
-                      return "Enter  password does not match";
-                    } else
+                    if (value == null || value.isEmpty) {
+                      return "Enter a Valid Password";
+                    }
+                    else if (value.length < 8) {
+                      return "password must be 8 characters";
+                    }
+                    else
                       return null;
                   },
                   controller: passwordcontroller,
@@ -113,17 +120,44 @@ class _SignUpPageState extends State<SignUpPage> {
               height: 40,
             ),
             InkWell(
+              // onTap: (){
+              //   if (emailcontroller.text.isNotEmpty &&
+              //       passwordcontroller.text.isNotEmpty
+              //      ) {
+              //     // Check if _image is not null
+              //     // userManagement.uploadImageAndUserData(
+              //     //   name: namecontroller.text,
+              //     //   age: agecontroller.text,
+              //     //   imagePath: imagePath,
+              //     // );
+              //     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+              //   } else {
+              //     Fluttertoast.showToast(
+              //       msg: "username and password can't be empty",
+              //       toastLength: Toast.LENGTH_SHORT,
+              //       gravity: ToastGravity.CENTER,
+              //       timeInSecForIosWeb: 1,
+              //       backgroundColor: Colors.red,
+              //       textColor: Colors.white,
+              //       fontSize: 16.0,
+              //     );
+              //   }
+              // },
                 onTap: () {
-                  FirebaseAuth.instance
-                      .createUserWithEmailAndPassword(
-                          email: emailcontroller.text, password: passwordcontroller.text)
-                      .then((value) => Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginPage()),
-                          (route) => false));
+                  registerWithEmailAndPassword(emailcontroller.text, passwordcontroller.text, context);
+                  // FirebaseAuth.instance
+                  //     .createUserWithEmailAndPassword(
+                  //         email: emailcontroller.text,
+                  //     password: passwordcontroller.text)
+                  //     .then((value) => Navigator.pushAndRemoveUntil(
+                  //         context,
+                  //         MaterialPageRoute(builder: (context) => LoginPage(
+                  //         )),
+                  //         (route) => false));
 
                   // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SecondLoginScreen()));
                 },
+
                 child: Container(
                     decoration: BoxDecoration(
                         color: Colors.blue,
@@ -195,5 +229,33 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
       )),
     );
+  }
+  void registerWithEmailAndPassword(
+      String email,String password,BuildContext context) async {
+    try {
+      UserCredential userCredential=await FirebaseAuth.instance.createUserWithEmailAndPassword
+        (email: email, password: password);
+       Fluttertoast.showToast(
+         msg: "All fields are mandatory!",
+         toastLength: Toast.LENGTH_SHORT,
+         gravity: ToastGravity.CENTER,
+         timeInSecForIosWeb: 1,
+         backgroundColor: Colors.red,
+         textColor: Colors.white,
+         fontSize: 16.0,
+       );
+       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginPage()));
+    }
+    catch(e){
+      Fluttertoast.showToast(
+        msg:e.toString(),
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 }

@@ -1,13 +1,10 @@
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
-
 import 'home_page.dart';
 import 'modelclass.dart';
 
@@ -27,6 +24,7 @@ class _AddDetailsPageState extends State<AddDetailsPage> {
   final ImagePicker _picker = ImagePicker();
   var uuid=Uuid();
   var id;
+
   @override
   void initState() {
     id=uuid.v1();

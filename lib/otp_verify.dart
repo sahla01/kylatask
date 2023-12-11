@@ -2,12 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kaylatask/otp_page.dart';
 import 'package:pinput/pinput.dart';
-
 import 'home_page.dart';
-
-
-
-
 class MyVerify extends StatefulWidget {
   const MyVerify({Key? key,}) : super(key: key);
 
