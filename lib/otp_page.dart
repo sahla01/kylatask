@@ -17,105 +17,112 @@ class _OtpPageState extends State<OtpPage> {
   TextEditingController countryController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   var phone = "";
+  final otpKey=GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(height: 300,),
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 30, right: 30, top: 25),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3), // changes position of shadow
-                  ),
-                ],
-              ),
-              child: TextFormField(
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Enter a valid phone number";
-                  }
-                  else if (value.length < 10 || value.length > 10) {
-                    return "phone must be 10 character";
-                  }
-                  else
-                    return null;
-                },
-                controller: phonecontrollers,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter your phone number',
-                  border: InputBorder.none, // Remove the default underline
-                  contentPadding: EdgeInsets.all(10.0),
-              ),
-            ),
-            ),
-          ),
-          SizedBox(height: 20,),
-          InkWell(
-              onTap: () async{
-
-                String phoneNumber = '+91${phonecontrollers.text}.}';
-
-                // Check if OTP verification is already done
-                if (!widget.isVerified) {
-                  // Perform OTP verification
-                  await FirebaseAuth.instance.verifyPhoneNumber(
-                    phoneNumber: phoneNumber,
-                    verificationCompleted: (PhoneAuthCredential credential) {
-                      // OTP verification is completed
-                      widget.isVerified = true;
-                      // Automatically sign in after OTP verification
-                      signInWithPhoneNumber(credential);
-                    },
-                    verificationFailed: (FirebaseAuthException e) {
-                      // Handle verification failure
-                      print("Verification Failed: ${e.message}");
-                    },
-                    codeSent: (String verificationId, int? resendToken) {
-                      // Set verificationId for later use
-                      OtpPage.verify = verificationId;
-                      // Navigate to OTP verification screen
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => MyVerify()),
-                      );
-                    },
-                    codeAutoRetrievalTimeout: (String verificationId) {
-                      // Handle timeout
-                      print("Verification Timed Out: $verificationId");
-                    },
-                  );
-                } else {
-                  // OTP is already verified, directly sign in
-                  signInWithPhoneNumber(null); // Pass null as credential
-                }
-                // _showRequestDialog();
-              },
+      body: Form(
+        key: otpKey,
+        child: Column(
+          children: [
+            SizedBox(height: 300,),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 30, right: 30, top: 25),
               child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.teal,
-                      borderRadius: BorderRadius.circular(30)),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 20,right: 20,top: 13,bottom: 13),
-                    child: Text(
-                      "Get OTP",
-                      style: TextStyle(
-                          color: Colors.white
-                      ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3), // changes position of shadow
                     ),
-                  ))),
-        ],
+                  ],
+                ),
+                child: TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Enter a valid phone number";
+                    }
+                    else if (value.length < 10 || value.length > 10) {
+                      return "phone must be 10 character";
+                    }
+                    else
+                      return null;
+                  },
+                  controller: phonecontrollers,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your phone number',
+                    border: InputBorder.none, // Remove the default underline
+                    contentPadding: EdgeInsets.all(10.0),
+                ),
+              ),
+              ),
+            ),
+            SizedBox(height: 20,),
+            InkWell(
+                onTap: () async{
+
+                 if(otpKey.currentState!.validate()){
+
+                   String phoneNumber = '+91${phonecontrollers.text}.}';
+
+                   // Check if OTP verification is already done
+                   if (!widget.isVerified) {
+                     // Perform OTP verification
+                     await FirebaseAuth.instance.verifyPhoneNumber(
+                       phoneNumber: phoneNumber,
+                       verificationCompleted: (PhoneAuthCredential credential) {
+                         // OTP verification is completed
+                         widget.isVerified = true;
+                         // Automatically sign in after OTP verification
+                         signInWithPhoneNumber(credential);
+                       },
+                       verificationFailed: (FirebaseAuthException e) {
+                         // Handle verification failure
+                         print("Verification Failed: ${e.message}");
+                       },
+                       codeSent: (String verificationId, int? resendToken) {
+                         // Set verificationId for later use
+                         OtpPage.verify = verificationId;
+                         // Navigate to OTP verification screen
+                         Navigator.pushReplacement(
+                           context,
+                           MaterialPageRoute(builder: (context) => MyVerify()),
+                         );
+                       },
+                       codeAutoRetrievalTimeout: (String verificationId) {
+                         // Handle timeout
+                         print("Verification Timed Out: $verificationId");
+                       },
+                     );
+                   } else {
+                     // OTP is already verified, directly sign in
+                     signInWithPhoneNumber(null); // Pass null as credential
+                   }
+                 }
+                  // _showRequestDialog();
+                },
+                child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.teal,
+                        borderRadius: BorderRadius.circular(30)),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 20,right: 20,top: 13,bottom: 13),
+                      child: Text(
+                        "Get OTP",
+                        style: TextStyle(
+                            color: Colors.white
+                        ),
+                      ),
+                    ))),
+          ],
+        ),
       ),
     );
   }
